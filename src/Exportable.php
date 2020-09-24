@@ -11,7 +11,7 @@ use InvalidArgumentException;
 /**
  * Trait Exportable.
  *
- * @property bool $with_header
+ * @property bool                           $with_header
  * @property \Illuminate\Support\Collection $data
  */
 trait Exportable
@@ -20,6 +20,7 @@ trait Exportable
      * @var Style
      */
     private $header_style;
+    private $rows_style;
 
     /**
      * @param string $path
@@ -134,7 +135,11 @@ trait Exportable
             $this->writeHeader($writer, $collection->first());
         }
         // Write all rows
-        $writer->addRows($collection->toArray());
+        if ($this->rows_style) {
+            $writer->addRowsWithStyle($collection->toArray(), $this->rows_style);
+        } else {
+            $writer->addRows($collection->toArray());
+        }
     }
 
     private function writeRowsFromGenerator($writer, Generator $generator, ?callable $callback = null)
@@ -153,7 +158,11 @@ trait Exportable
                 $this->writeHeader($writer, $item);
             }
             // Write rows (one by one).
-            $writer->addRow($item->toArray());
+            if ($this->rows_style) {
+                $writer->addRowWithStyle($item->toArray(), $this->rows_style);
+            } else {
+                $writer->addRow($item->toArray());
+            }
         }
     }
 
@@ -219,9 +228,9 @@ trait Exportable
     private function transformRow($data)
     {
         return collect($data)->map(function ($value) {
-            return is_int($value) || is_float($value) || is_null($value) ? (string) $value : $value;
+            return is_null($value) ? (string) $value : $value;
         })->filter(function ($value) {
-            return is_string($value);
+            return is_string($value) || is_int($value) || is_float($value);
         });
     }
 
@@ -233,6 +242,18 @@ trait Exportable
     public function headerStyle(Style $style)
     {
         $this->header_style = $style;
+
+        return $this;
+    }
+
+    /**
+     * @param Style $style
+     *
+     * @return Exportable
+     */
+    public function rowsStyle(Style $style)
+    {
+        $this->rows_style = $style;
 
         return $this;
     }
