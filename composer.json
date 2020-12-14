@@ -1,5 +1,5 @@
 {
-  "name": "gcordonpgva/sheet-excel-import",
+  "name": "phoenix-group-of-virginia/sheet-excel-import",
   "type": "library",
   "keywords": ["laravel", "excel", "csv", "xls", "xlsx"],
   "description": "Fast Excel import/export for Laravel",
